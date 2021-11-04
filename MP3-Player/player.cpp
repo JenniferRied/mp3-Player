@@ -7,6 +7,8 @@ Player::Player(QWidget *parent)
 {
     ui->setupUi(this);
 
+    //Icons
+
     //https://www.flaticon.com/de/kostenloses-icon/wiedergabetaste_149668?term=play&page=1&position=2&page=1&position=2&related_id=149668&origin=search
     QIcon* wiedergabe = new QIcon(":/Bilder/wiedergabetaste.png");
     //https://www.flaticon.com/premium-icon/backward_2938636?term=backward&page=1&position=40&page=1&position=40&related_id=2938636&origin=search
@@ -48,6 +50,16 @@ Player::Player(QWidget *parent)
     ui->stopp_button->setIconSize(iconSize);
     ui->stumm_button->setIcon(*stumm);
     ui->stumm_button->setIconSize(iconSize);
+
+    //ToolTips
+    ui->wiedergabe_pause_button->setToolTip("Wiedergabe/Pause");
+    ui->zurueckspulen_button->setToolTip("Zurückspulen");
+    ui->vorspulen_button->setToolTip("Vorspulen");
+    ui->zufall_button->setToolTip("zufällige Wiedergabe");
+    ui->zurueckspringen_button->setToolTip("Zurück");
+    ui->weiter_button->setToolTip("weiter");
+    ui->stopp_button->setToolTip("Stopp");
+    ui->stumm_button->setToolTip("Stumm schalten");
 
 
     ui->widget->setVisible(false);
