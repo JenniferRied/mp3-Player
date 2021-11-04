@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/Bilder">
+        <file>backward.png</file>
+        <file>forward.png</file>
+        <file>last.png</file>
+        <file>next-button.png</file>
+        <file>shuffle-arrows.png</file>
+        <file>silent.png</file>
+        <file>stop.png</file>
+        <file>wiedergabetaste.png</file>
+        <file>pause.png</file>
+    </qresource>
+</RCC>
