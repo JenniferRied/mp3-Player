@@ -6,8 +6,9 @@
         <file>next-button.png</file>
         <file>shuffle-arrows.png</file>
         <file>silent.png</file>
-        <file>stop.png</file>
         <file>wiedergabetaste.png</file>
         <file>pause.png</file>
+        <file>stop.png</file>
     </qresource>
+    <qresource prefix="/"/>
 </RCC>
