@@ -48,6 +48,32 @@
        <item>
         <widget class="QLineEdit" name="album_lineEdit"/>
        </item>
+       <item>
+        <widget class="QPushButton" name="suche_starten_button">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="suche_schliessen_button">
+         <property name="maximumSize">
+          <size>
+           <width>30</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>X</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -279,15 +305,14 @@
     </property>
     <addaction name="separator"/>
    </widget>
-   <widget class="QMenu" name="menuSuche">
-    <property name="title">
-     <string>Suche</string>
-    </property>
-    <addaction name="separator"/>
-   </widget>
    <widget class="QMenu" name="menuClose">
     <property name="title">
      <string>Schließen</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuSuche">
+    <property name="title">
+     <string>Suche</string>
     </property>
    </widget>
    <addaction name="menuLieder_hinzuf_gen"/>

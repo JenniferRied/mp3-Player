@@ -9,6 +9,7 @@
         <file>wiedergabetaste.png</file>
         <file>pause.png</file>
         <file>stop.png</file>
+        <file>lupe.png</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>
