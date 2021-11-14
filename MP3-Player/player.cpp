@@ -1,6 +1,13 @@
 #include "player.h"
 #include "ui_player.h"
 #include <QMessageBox>
+#include <QMediaService>
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
+#include <QFileDialog>
+#include <QMediaMetaData>
+#include <QtWidgets>
+
 
 Player::Player(QWidget *parent)
     : QMainWindow(parent)
@@ -75,8 +82,54 @@ Player::Player(QWidget *parent)
     connect(ui->suche_starten_button, SIGNAL (clicked()), this, SLOT (suche_starten()));
     connect(ui->suche_schliessen_button, SIGNAL(clicked()), this, SLOT (suche_beenden()));
 
-    ui->widget->setVisible(false);
+    connect(ui->menuLieder_hinzuf_gen, SIGNAL (aboutToShow()), this, SLOT (oeffnen()));
+
+    ui->widget->setVisible(false);   
 }
+
+
+/*
+
+void Player::oeffnen()
+{
+    QFileDialog hinzufuegen(this);
+    hinzufuegen.setAcceptMode(QFileDialog::AcceptOpen);
+    hinzufuegen.setWindowTitle("Musik hinzufügen");
+
+    //QStringList unterstuetzteTypen = player -> supportedMimeTypes();          //Testen ob es eine mp.3 ist
+    //if (!unterstuetzteTypen.isEmpty()){
+    //    unterstuetzteTypen.append("audio/x-m3u");
+    //    hinzufuegen.setMimeTypeFilters(unterstuetzteTypen);
+    //}
+
+    hinzufuegen.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).value(0,QDir::homePath()));
+    if (hinzufuegen.exec() == QDialog::Accepted)
+        addToPlaylist(hinzufuegen.selectedUrls());
+
+    //player -> setPlaylist(playlist);             //Nur als Test zum Wiedergeben der Playlist nachdem ein Lied hunzugefügt wurde
+    //player -> play();
+}
+
+
+static bool isPlaylist(const QUrl &url)
+{
+    if (!url.isLocalFile())
+        return false;
+    const QFileInfo fileInfo(url.toLocalFile());
+    return fileInfo.exists() && !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
+}
+
+void Player::addToPlaylist(const QList<QUrl> &urls)
+{
+    for (auto &url: urls) {
+        if (isPlaylist(url))
+            playlist->load(url);
+        else
+            playlist->addMedia(url);
+    }
+}
+
+*/
 
 void Player::suche()
 {
