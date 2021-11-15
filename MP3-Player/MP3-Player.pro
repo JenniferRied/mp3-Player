@@ -1,5 +1,8 @@
-QT       += core gui multimedia
-QT       += multimedia multimediawidgets
+QT       += core gui \
+            multimedia \
+            multimediawidgets \
+            network \
+            xml
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11

@@ -8,13 +8,15 @@
 #include <QMediaMetaData>
 #include <QtWidgets>
 
-
 Player::Player(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Player)
 {
     ui->setupUi(this);
-
+    player = new QMediaPlayer(this);
+    player->setAudioRole(QAudio::VideoRole);
+    playlist = new QMediaPlaylist();
+    player->setPlaylist(playlist);
     //Icons
 
     //https://www.flaticon.com/de/suche?word=lupe
@@ -34,7 +36,7 @@ Player::Player(QWidget *parent)
     //https://www.flaticon.com/search?word=silent&order_by=4&type=icon
     QIcon* stumm = new QIcon(":/Bilder/silent.png");
     //https://www.flaticon.com/search?word=pause&order_by=4&type=icon
-    QIcon* pause = new QIcon(":/Bilder/pause.png");
+    //QIcon* pause = new QIcon(":/Bilder/pause.png");
 
     QSize iconSize_zurueckspulen_vorspulen;
     iconSize_zurueckspulen_vorspulen.setWidth(60);
@@ -87,27 +89,14 @@ Player::Player(QWidget *parent)
     ui->widget->setVisible(false);   
 }
 
-
-/*
-
 void Player::oeffnen()
 {
     QFileDialog hinzufuegen(this);
     hinzufuegen.setAcceptMode(QFileDialog::AcceptOpen);
-    hinzufuegen.setWindowTitle("Musik hinzufügen");
-
-    //QStringList unterstuetzteTypen = player -> supportedMimeTypes();          //Testen ob es eine mp.3 ist
-    //if (!unterstuetzteTypen.isEmpty()){
-    //    unterstuetzteTypen.append("audio/x-m3u");
-    //    hinzufuegen.setMimeTypeFilters(unterstuetzteTypen);
-    //}
-
+    hinzufuegen.setWindowTitle(tr("Musik hinzufügen"));
     hinzufuegen.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).value(0,QDir::homePath()));
     if (hinzufuegen.exec() == QDialog::Accepted)
         addToPlaylist(hinzufuegen.selectedUrls());
-
-    //player -> setPlaylist(playlist);             //Nur als Test zum Wiedergeben der Playlist nachdem ein Lied hunzugefügt wurde
-    //player -> play();
 }
 
 
@@ -128,8 +117,6 @@ void Player::addToPlaylist(const QList<QUrl> &urls)
             playlist->addMedia(url);
     }
 }
-
-*/
 
 void Player::suche()
 {
