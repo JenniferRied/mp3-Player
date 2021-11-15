@@ -21,7 +21,8 @@ public:
     void addToPlaylist(const QList<QUrl> &urls);
 
 public slots:
-
+    void wiedergabe();
+    void stopp();
     void suche();
     void suche_starten();
     void suche_beenden();
@@ -33,6 +34,8 @@ private:
 
     QMediaPlaylist *playlist = nullptr;
     QMediaPlayer* player = nullptr;
-
+    bool wird_wiedergeben = false;
+    QIcon* pause;
+    QIcon* wiedergabe_Icon;
 };
 #endif // PLAYER_H

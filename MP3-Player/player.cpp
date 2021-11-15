@@ -22,7 +22,7 @@ Player::Player(QWidget *parent)
     //https://www.flaticon.com/de/suche?word=lupe
     QIcon* suche = new QIcon(":/Bilder/lupe.png");
     //https://www.flaticon.com/de/kostenloses-icon/wiedergabetaste_149668?term=play&page=1&position=2&page=1&position=2&related_id=149668&origin=search
-    QIcon* wiedergabe = new QIcon(":/Bilder/wiedergabetaste.png");
+    wiedergabe_Icon = new QIcon(":/Bilder/wiedergabetaste.png");
     //https://www.flaticon.com/premium-icon/backward_2938636?term=backward&page=1&position=40&page=1&position=40&related_id=2938636&origin=search
     QIcon* zurueckspulen = new QIcon(":/Bilder/backward.png");
     QIcon* vorspulen = new QIcon(":/Bilder/forward.png");
@@ -32,11 +32,11 @@ Player::Player(QWidget *parent)
     QIcon* zurueck = new QIcon(":/Bilder/last.png");
     QIcon* weiter = new QIcon(":/Bilder/next-button.png");
     //https://www.flaticon.com/search?word=stop&type=icon
-    QIcon* stopp = new QIcon(":/Bilder/stop.png");
+    QIcon* stopp_Icon = new QIcon(":/Bilder/stop.png");
     //https://www.flaticon.com/search?word=silent&order_by=4&type=icon
     QIcon* stumm = new QIcon(":/Bilder/silent.png");
     //https://www.flaticon.com/search?word=pause&order_by=4&type=icon
-    //QIcon* pause = new QIcon(":/Bilder/pause.png");
+    pause = new QIcon(":/Bilder/pause.png");
 
     QSize iconSize_zurueckspulen_vorspulen;
     iconSize_zurueckspulen_vorspulen.setWidth(60);
@@ -50,7 +50,7 @@ Player::Player(QWidget *parent)
     iconSize_suche.setWidth(28);
     iconSize_suche.setHeight(28);
 
-    ui->wiedergabe_pause_button->setIcon(*wiedergabe);
+    ui->wiedergabe_pause_button->setIcon(*wiedergabe_Icon);
     ui->wiedergabe_pause_button->setIconSize(iconSize);
     ui->zurueckspulen_button->setIcon(*zurueckspulen);
     ui->zurueckspulen_button->setIconSize(iconSize_zurueckspulen_vorspulen);
@@ -62,7 +62,7 @@ Player::Player(QWidget *parent)
     ui->zurueckspringen_button->setIconSize(iconSize);
     ui->weiter_button->setIcon(*weiter);
     ui->weiter_button->setIconSize(iconSize);
-    ui->stopp_button->setIcon(*stopp);
+    ui->stopp_button->setIcon(*stopp_Icon);
     ui->stopp_button->setIconSize(iconSize);
     ui->stumm_button->setIcon(*stumm);
     ui->stumm_button->setIconSize(iconSize);
@@ -83,7 +83,8 @@ Player::Player(QWidget *parent)
     connect(ui->menuSuche, SIGNAL (aboutToShow()), this, SLOT (suche()));
     connect(ui->suche_starten_button, SIGNAL (clicked()), this, SLOT (suche_starten()));
     connect(ui->suche_schliessen_button, SIGNAL(clicked()), this, SLOT (suche_beenden()));
-
+    connect(ui->wiedergabe_pause_button, SIGNAL(clicked()),this, SLOT(wiedergabe()));
+    connect(ui->stopp_button,SIGNAL(clicked()),this, SLOT(stopp()));
     connect(ui->menuLieder_hinzuf_gen, SIGNAL (aboutToShow()), this, SLOT (oeffnen()));
 
     ui->widget->setVisible(false);   
@@ -115,6 +116,29 @@ void Player::addToPlaylist(const QList<QUrl> &urls)
             playlist->load(url);
         else
             playlist->addMedia(url);
+    }
+}
+
+void Player::stopp()
+{
+    if(!wird_wiedergeben)
+    {
+        player->stop();
+        wird_wiedergeben = false;
+    }
+}
+
+void Player::wiedergabe()
+{
+    if(!wird_wiedergeben)
+    {
+        ui->wiedergabe_pause_button->setIcon(*pause);
+        player->play();
+        wird_wiedergeben = true;
+    }else{
+        ui->wiedergabe_pause_button->setIcon(*wiedergabe_Icon);
+        player->pause();
+        wird_wiedergeben = false;
     }
 }
 
