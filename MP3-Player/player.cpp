@@ -7,6 +7,7 @@
 #include <QFileDialog>
 #include <QMediaMetaData>
 #include <QtWidgets>
+#include <iostream>
 
 Player::Player(QWidget *parent)
     : QMainWindow(parent)
@@ -17,10 +18,9 @@ Player::Player(QWidget *parent)
     player->setAudioRole(QAudio::VideoRole);
     playlist = new QMediaPlaylist();
     player->setPlaylist(playlist);
+    ui->aktuelle_wiedergabe_slider->setRange(0, player->duration()/ 1000);
     //Icons
 
-    //https://www.flaticon.com/de/suche?word=lupe
-    QIcon* suche = new QIcon(":/Bilder/lupe.png");
     //https://www.flaticon.com/de/kostenloses-icon/wiedergabetaste_149668?term=play&page=1&position=2&page=1&position=2&related_id=149668&origin=search
     wiedergabe_Icon = new QIcon(":/Bilder/wiedergabetaste.png");
     //https://www.flaticon.com/premium-icon/backward_2938636?term=backward&page=1&position=40&page=1&position=40&related_id=2938636&origin=search
@@ -66,8 +66,6 @@ Player::Player(QWidget *parent)
     ui->stopp_button->setIconSize(iconSize);
     ui->stumm_button->setIcon(*stumm);
     ui->stumm_button->setIconSize(iconSize);
-    ui->suche_starten_button->setIcon(*suche);
-    ui->suche_starten_button->setIconSize(iconSize_suche);
 
     //ToolTips
     ui->wiedergabe_pause_button->setToolTip("Wiedergabe/Pause");
@@ -80,12 +78,17 @@ Player::Player(QWidget *parent)
     ui->stumm_button->setToolTip("Stumm schalten");
 
 
-    connect(ui->menuSuche, SIGNAL (aboutToShow()), this, SLOT (suche()));
-    connect(ui->suche_starten_button, SIGNAL (clicked()), this, SLOT (suche_starten()));
+    connect(ui->menuSuche, &QAction::triggered, this, &Player::suche);
+    connect(ui->titel_lineEdit, &QLineEdit::textChanged, this, &Player::suche_starten);
+    connect(ui->kuenstler_lineEdit, &QLineEdit::textChanged, this, &Player::suche_starten);
+    connect(ui->album_lineEdit, &QLineEdit::textChanged, this, &Player::suche_starten);
     connect(ui->suche_schliessen_button, SIGNAL(clicked()), this, SLOT (suche_beenden()));
     connect(ui->wiedergabe_pause_button, SIGNAL(clicked()),this, SLOT(wiedergabe()));
     connect(ui->stopp_button,SIGNAL(clicked()),this, SLOT(stopp()));
-    connect(ui->menuLieder_hinzuf_gen, SIGNAL (aboutToShow()), this, SLOT (oeffnen()));
+    connect(ui->menuLieder_hinzuf_gen, &QAction::triggered, this, &Player::oeffnen);
+    connect(player,&QMediaPlayer::positionChanged, this, &Player::geaenderte_zeit);
+    connect(player, &QMediaPlayer::durationChanged, this, &Player::neues_lied);
+    connect(ui->aktuelle_wiedergabe_slider, &QSlider::sliderMoved,this, &Player::geaenderte_position);
 
     ui->widget->setVisible(false);   
 }
@@ -97,11 +100,11 @@ void Player::oeffnen()
     hinzufuegen.setWindowTitle(tr("Musik hinzufügen"));
     hinzufuegen.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).value(0,QDir::homePath()));
     if (hinzufuegen.exec() == QDialog::Accepted)
-        addToPlaylist(hinzufuegen.selectedUrls());
+        hinzufugen_zur_playlist(hinzufuegen.selectedUrls());
 }
 
 
-static bool isPlaylist(const QUrl &url)
+static bool ist_playlist(const QUrl &url)
 {
     if (!url.isLocalFile())
         return false;
@@ -109,10 +112,10 @@ static bool isPlaylist(const QUrl &url)
     return fileInfo.exists() && !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
 }
 
-void Player::addToPlaylist(const QList<QUrl> &urls)
+void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
 {
     for (auto &url: urls) {
-        if (isPlaylist(url))
+        if (ist_playlist(url))
             playlist->load(url);
         else
             playlist->addMedia(url);
@@ -121,9 +124,10 @@ void Player::addToPlaylist(const QList<QUrl> &urls)
 
 void Player::stopp()
 {
-    if(!wird_wiedergeben)
+    player->stop();
+    if(wird_wiedergeben)
     {
-        player->stop();
+        ui->wiedergabe_pause_button->setIcon(*wiedergabe_Icon);
         wird_wiedergeben = false;
     }
 }
@@ -142,10 +146,34 @@ void Player::wiedergabe()
     }
 }
 
+void Player::geaenderte_position(int sekunden)
+{
+    player->setPosition(sekunden * 1000);
+}
+
+
+void Player::neues_lied(qint64 millisekunden)
+{
+    ui->aktuelle_wiedergabe_slider->setMaximum(millisekunden / 1000);
+}
+
+void Player::geaenderte_zeit(qint64 progress)
+{
+    if(!ui->aktuelle_wiedergabe_slider->isSliderDown())
+    {
+        ui->aktuelle_wiedergabe_slider->setValue(progress / 1000);
+    }
+    int dauer = player->duration() / 1000;
+    QTime laenge((dauer/3600) % 60, (dauer/60) % 60, dauer % 60, (dauer *1000) % 1000);
+    ui->dauer_label->setText(laenge.toString("mm:ss"));
+    int gespielt = progress / 1000;
+    QTime spielte((gespielt/3600) % 60, (gespielt/60) % 60, gespielt % 60, (gespielt *1000) % 1000);
+    ui->bisherige_dauer_label->setText(spielte.toString("mm:ss"));
+}
+
 void Player::suche()
 {
     ui->widget->setVisible(true);
-    ui->suche_schliessen_button->setVisible(false);
 }
 
 void Player::suche_beenden()
@@ -161,118 +189,24 @@ void Player::suche_starten()
     QString titel = ui->titel_lineEdit->text();
     QString kuenstler = ui->kuenstler_lineEdit->text();
     QString album = ui->album_lineEdit->text();
-    bool keine_eingabe = false;
-    for(int i = 0; i < ui->tableWidget->rowCount(); i++){
-            bool treffer = false;
-            for(int j = 0; j < ui->tableWidget->columnCount(); j++){
-                QTableWidgetItem *eintrag = ui->tableWidget->item(i, j);
-                QTableWidgetItem *eintrag2 = ui->tableWidget->item(i,j+1);
-                QTableWidgetItem *eintrag3 = ui->tableWidget->item(i,j+2);
 
-                //Eingabe cases
-
-                //Fehlermeldung wenn kein Feld ausgefüllt wurde
-
-
-                if(ui->album_lineEdit->text().isEmpty() && ui->titel_lineEdit->text().isEmpty() && ui->kuenstler_lineEdit->text().isEmpty())
-                {
-                    keine_eingabe = true;
-                }
-
-
-                if(!ui->titel_lineEdit->text().isEmpty() && !ui->kuenstler_lineEdit->text().isEmpty())
-                {
-                    //alle 3 Felder ausgefüllt
-
-                    if(!ui->album_lineEdit->text().isEmpty())
-                    {
-                        if( eintrag->text() == titel and eintrag2->text() == kuenstler and eintrag3->text() == album)
-                        {
-                            treffer = true;
-                            break;
-                        }
-                    }
-
-                    //Titel und Künstler ausgefüllt
-
-                    if(ui->album_lineEdit->text().isEmpty())
-                    {
-                        if( eintrag->text()== titel and eintrag2->text() == kuenstler )
-                        {
-                            treffer = true;
-                            break;
-                        }
-                    }
-                }
-
-
-
-                if(!ui->titel_lineEdit->text().isEmpty() || !ui->kuenstler_lineEdit->text().isEmpty())
-                {
-                    //entweder Titel oder Künstler ausgefüllt
-
-                    if(ui->album_lineEdit->text().isEmpty())
-                    {
-                        if( eintrag->text().contains(titel + kuenstler))
-                        {
-                            treffer = true;
-                            break;
-                        }
-                    }
-
-                    //Album ebenfalls ausgefüllt
-                    if(!ui->album_lineEdit->text().isEmpty())
-                    {
-                        //Titel und Album ausgefüllt
-                        if(!ui->titel_lineEdit->text().isEmpty())
-                        {
-                            if(eintrag->text() == titel && eintrag3->text() == album)
-                            {
-                                treffer = true;
-                                break;
-                            }
-                        }
-                        //Künstler und Album ausgefüllt
-                        else
-                        {
-                            if(eintrag->text() == kuenstler && eintrag2->text() == album)
-                            {
-                                treffer = true;
-                                break;
-                            }
-                        }
-                    }
-
-                }
-
-                //Nur Album ausgefüllt
-
-                if(ui->titel_lineEdit->text().isEmpty() && ui->kuenstler_lineEdit->text().isEmpty())
-                {
-                    if(eintrag->text().contains(album))
-                    {
-                        treffer = true;
-                        break;
-                    }
-                }
-
-
-
-            }
-            ui->tableWidget->setRowHidden( i, !treffer);
-            kein_treffer.append(*ui->tableWidget->item( i, !treffer));
-        }
-
-    //Fehlermeldung, falls der Nutzer versucht die Suche zu starten ohne ein Suchkriterium eingegeben zu haben
-
-    if(keine_eingabe == true)
+    for(int i = 0; i < ui->tableWidget->rowCount(); i++)
     {
-        QMessageBox fehlermeldung;
-        fehlermeldung.critical(0, "Fehler", "Sie müssen mindestens 1 Feld für die Suche ausfüllen.");
-    }
+        bool treffer = true;
+        treffer &= ist_treffer(ui->tableWidget->item(i, 0)->text(), titel);
+        treffer &= ist_treffer(ui->tableWidget->item(i, 1)->text(), kuenstler);
+        treffer &= ist_treffer(ui->tableWidget->item(i, 2)->text(), album);
+
+        ui->tableWidget->setRowHidden( i, !treffer);
+        kein_treffer.append(*ui->tableWidget->item( i, !treffer));
+     }
 
     ui->suche_schliessen_button->setVisible(true);
+}
 
+bool Player::ist_treffer(const QString &zeilenInhalt, const QString &suchVorgabe)
+{
+    return suchVorgabe.isEmpty() || zeilenInhalt.contains(suchVorgabe);
 }
 
 Player::~Player()

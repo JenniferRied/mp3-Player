@@ -18,7 +18,7 @@ public:
     Player(QWidget *parent = nullptr);
     ~Player();
 
-    void addToPlaylist(const QList<QUrl> &urls);
+    void hinzufugen_zur_playlist(const QList<QUrl> &urls);
 
 public slots:
     void wiedergabe();
@@ -27,6 +27,9 @@ public slots:
     void suche_starten();
     void suche_beenden();
     void oeffnen();
+    void geaenderte_position(int sekunden);
+    void neues_lied(qint64 millisekunden);
+    void geaenderte_zeit(qint64 progress);
 
 private:
     Ui::Player *ui;
@@ -37,5 +40,7 @@ private:
     bool wird_wiedergeben = false;
     QIcon* pause;
     QIcon* wiedergabe_Icon;
+
+    bool ist_treffer(const QString& zeilenInhalt, const QString& suchVorgabe);
 };
 #endif // PLAYER_H
