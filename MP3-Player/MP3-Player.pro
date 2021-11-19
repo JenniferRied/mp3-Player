@@ -27,6 +27,7 @@ SOURCES += \
     player.cpp
 
 HEADERS += \
+    datei_infos.h \
     player.h
 
 FORMS += \

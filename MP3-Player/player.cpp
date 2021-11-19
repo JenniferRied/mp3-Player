@@ -1,4 +1,5 @@
 #include "player.h"
+#include "datei_infos.h"
 #include "ui_player.h"
 #include <QMessageBox>
 #include <QMediaService>
