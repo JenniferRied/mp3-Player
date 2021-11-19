@@ -89,6 +89,10 @@ Player::Player(QWidget *parent)
     connect(player,&QMediaPlayer::positionChanged, this, &Player::geaenderte_zeit);
     connect(player, &QMediaPlayer::durationChanged, this, &Player::neues_lied);
     connect(ui->aktuelle_wiedergabe_slider, &QSlider::sliderMoved,this, &Player::geaenderte_position);
+    connect(ui->lautstaerke_slider, &QSlider::sliderMoved, this, &Player::lautstaerke_slider);
+    connect(ui->stumm_button, SIGNAL(clicked()), this, SLOT(stummschalten()));
+    connect(ui->weiter_button, SIGNAL(clicked()), this, SLOT(naechstes_lied()));
+    connect(ui->zurueckspringen_button, SIGNAL(clicked()), this, SLOT(vorheriges_lied()));
 
     ui->widget->setVisible(false);   
 }
@@ -171,6 +175,47 @@ void Player::geaenderte_zeit(qint64 progress)
     ui->bisherige_dauer_label->setText(spielte.toString("mm:ss"));
 }
 
+void Player::lautstaerke_slider(int position)
+{
+    player->setVolume(position);
+}
+
+void Player::stummschalten()
+{
+    if(ui->lautstaerke_slider->value() != 0)
+    {
+        player->setVolume(0);
+        ui->lautstaerke_slider->setValue(0);
+    }
+    else
+    {
+        player->setVolume(100);
+        ui->lautstaerke_slider->setValue(100);
+    }
+}
+
+void Player::vorheriges_lied()
+{
+    playlist->previous();
+    if(!wird_wiedergeben)
+    {
+        ui->wiedergabe_pause_button->setIcon(*pause);
+        player->play();
+        wird_wiedergeben = true;
+    }
+}
+
+void Player::naechstes_lied()
+{
+    playlist->next();
+    if(!wird_wiedergeben)
+    {
+        ui->wiedergabe_pause_button->setIcon(*pause);
+        player->play();
+        wird_wiedergeben = true;
+    }
+}
+
 void Player::suche()
 {
     ui->widget->setVisible(true);
@@ -213,4 +258,3 @@ Player::~Player()
 {
     delete ui;
 }
-

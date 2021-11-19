@@ -30,6 +30,10 @@ public slots:
     void geaenderte_position(int sekunden);
     void neues_lied(qint64 millisekunden);
     void geaenderte_zeit(qint64 progress);
+    void lautstaerke_slider(int);
+    void stummschalten();
+    void naechstes_lied();
+    void vorheriges_lied();
 
 private:
     Ui::Player *ui;
