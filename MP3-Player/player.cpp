@@ -9,6 +9,7 @@
 #include <QMediaMetaData>
 #include <QtWidgets>
 #include <iostream>
+#include <QShortcut>
 
 Player::Player(QWidget *parent)
     : QMainWindow(parent)
@@ -68,6 +69,13 @@ Player::Player(QWidget *parent)
     ui->stumm_button->setIcon(*stumm);
     ui->stumm_button->setIconSize(iconSize);
 
+    //Shortcuts
+    QShortcut *skip = new QShortcut(QKeySequence(Qt::Key_Right), this);
+    QShortcut *previous = new QShortcut(QKeySequence(Qt::Key_Left), this);
+    QShortcut *pause_play = new QShortcut(QKeySequence(Qt::Key_Space), this);
+    QShortcut *stop = new QShortcut(QKeySequence("Ctrl+X"), this);
+    QShortcut *mute = new QShortcut(QKeySequence("Ctrl+M"), this);
+
     //ToolTips
     ui->wiedergabe_pause_button->setToolTip("Wiedergabe/Pause");
     ui->zurueckspulen_button->setToolTip("Zurückspulen");
@@ -85,17 +93,22 @@ Player::Player(QWidget *parent)
     connect(ui->album_lineEdit, &QLineEdit::textChanged, this, &Player::suche_starten);
     connect(ui->suche_schliessen_button, SIGNAL(clicked()), this, SLOT (suche_beenden()));
     connect(ui->wiedergabe_pause_button, SIGNAL(clicked()),this, SLOT(wiedergabe()));
+    connect(pause_play, SIGNAL(activated()), this, SLOT(wiedergabe()));
     connect(ui->stopp_button,SIGNAL(clicked()),this, SLOT(stopp()));
+    connect(stop, SIGNAL(activated()), this, SLOT(stopp()));
     connect(ui->menuLieder_hinzuf_gen, &QAction::triggered, this, &Player::oeffnen);
     connect(player,&QMediaPlayer::positionChanged, this, &Player::geaenderte_zeit);
     connect(player, &QMediaPlayer::durationChanged, this, &Player::neues_lied);
     connect(ui->aktuelle_wiedergabe_slider, &QSlider::sliderMoved,this, &Player::geaenderte_position);
     connect(ui->lautstaerke_slider, &QSlider::sliderMoved, this, &Player::lautstaerke_slider);
     connect(ui->stumm_button, SIGNAL(clicked()), this, SLOT(stummschalten()));
+    connect(mute, SIGNAL(activated()), this, SLOT(stummschalten()));
     connect(ui->weiter_button, SIGNAL(clicked()), this, SLOT(naechstes_lied()));
+    connect(skip, SIGNAL(activated()), this, SLOT(naechstes_lied()));
     connect(ui->zurueckspringen_button, SIGNAL(clicked()), this, SLOT(vorheriges_lied()));
+    connect(previous, SIGNAL(activated()), this, SLOT(vorheriges_lied()));
 
-    ui->widget->setVisible(false);   
+    ui->widget->setVisible(false);
 }
 
 void Player::oeffnen()
