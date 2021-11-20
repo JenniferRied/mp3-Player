@@ -5,6 +5,8 @@
 #include <QTableWidgetItem>
 #include <QMediaPlaylist>
 #include <QMediaPlayer>
+#include <QMap>
+#include "datei_info.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Player; }
@@ -34,17 +36,24 @@ public slots:
     void stummschalten();
     void naechstes_lied();
     void vorheriges_lied();
+    void zufallslied();
+    void lied_ausgewahlt(int zeile, int spalte);
 
 private:
     Ui::Player *ui;
-    QList<QTableWidgetItem> kein_treffer;
 
     QMediaPlaylist *playlist = nullptr;
     QMediaPlayer* player = nullptr;
     bool wird_wiedergeben = false;
     QIcon* pause;
     QIcon* wiedergabe_Icon;
+    QAtomicInt letzte_id;
 
+    void lied_hinzufuegen(QUrl);
     bool ist_treffer(const QString& zeilenInhalt, const QString& suchVorgabe);
+    void tabellenansicht();
+    Datei_info* lied_erstellen(QString url);
+
+    QMap<QString,Datei_info*> Liedersammlung;
 };
 #endif // PLAYER_H
