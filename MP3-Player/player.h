@@ -38,6 +38,8 @@ public slots:
     void vorheriges_lied();
     void zufallslied();
     void lied_ausgewahlt(int zeile, int spalte);
+    void loeschen(int);
+    void customcontextmenu(const QPoint& pos);
 
 private:
     Ui::Player *ui;
@@ -48,6 +50,7 @@ private:
     QIcon* pause;
     QIcon* wiedergabe_Icon;
     QAtomicInt letzte_id;
+    int pos;
 
     void lied_hinzufuegen(QUrl);
     bool ist_treffer(const QString& zeilenInhalt, const QString& suchVorgabe);

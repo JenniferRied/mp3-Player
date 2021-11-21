@@ -286,6 +286,12 @@
           <height>16</height>
          </size>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
+        </property>
        </widget>
       </item>
       <item>
@@ -362,7 +368,7 @@
     <string>Suche</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+F</string>
+    <string>Ctrl+S</string>
    </property>
   </action>
  </widget>

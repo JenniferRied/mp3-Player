@@ -109,9 +109,37 @@ Player::Player(QWidget *parent)
     connect(previous, SIGNAL(activated()), this, SLOT(vorheriges_lied()));
     connect(ui->zufall_button,SIGNAL(clicked()), this, SLOT(zufallslied()));
     connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,this, &Player::lied_ausgewahlt);
-
+    connect(ui->tableWidget,SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(customcontextmenu(QPoint)));
+    ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget->setVisible(false);
     tabellenansicht();
+}
+
+void Player::customcontextmenu(const QPoint &pos)
+{
+    QMenu custommenu;
+    QAction *u = custommenu.addAction("remove");
+    QAction *a = custommenu.exec(ui->tableWidget->viewport()->mapToGlobal(pos));
+        if (a == u)
+        {
+            QModelIndexList selection = ui->tableWidget->selectionModel()->selectedRows();
+
+            if (selection.count() > 0) {
+                QModelIndex index = selection.at(0);
+
+                //row selected
+                int row = index.row();
+
+                loeschen(row);
+                tabellenansicht();
+
+            }
+        }
+}
+
+void Player::loeschen(int pos)
+{
+    playlist->removeMedia(pos);
 }
 
 void Player::oeffnen()
@@ -253,6 +281,15 @@ void Player::stummschalten()
     {
         player->setVolume(100);
         ui->lautstaerke_slider->setValue(100);
+    }
+
+    if(ui->stumm_button->isChecked())
+    {
+        ui->stumm_button->setStyleSheet("background-color: green");
+    }
+    else
+    {
+        ui->stumm_button->setStyleSheet("background-color: white");
     }
 }
 
