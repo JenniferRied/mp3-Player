@@ -261,6 +261,10 @@ void Player::geaenderte_position(int sekunden)
 void Player::neues_lied(qint64 millisekunden)
 {
     ui->aktuelle_wiedergabe_slider->setMaximum(millisekunden / 1000);
+    QString url = player->currentMedia().canonicalUrl().toString();
+    QString titel = Liedersammlung[url]->getTitle();
+    QString kuenstler = Liedersammlung[url]->getArtist();
+    ui->aktuelles_lied->setText(titel + " - " + kuenstler);
 }
 
 void Player::geaenderte_zeit(qint64 progress)
