@@ -118,23 +118,22 @@ Player::Player(QWidget *parent)
 void Player::customcontextmenu(const QPoint &pos)
 {
     QMenu custommenu;
-    QAction *u = custommenu.addAction("remove");
+    QAction *u = custommenu.addAction("Aus der Playlist entfernen");
     QAction *a = custommenu.exec(ui->tableWidget->viewport()->mapToGlobal(pos));
-        if (a == u)
-        {
-            QModelIndexList selection = ui->tableWidget->selectionModel()->selectedRows();
+    if (a == u)
+    {
+        QModelIndexList selection = ui->tableWidget->selectionModel()->selectedRows();
 
-            if (selection.count() > 0) {
-                QModelIndex index = selection.at(0);
+        if (selection.count() > 0) {
+            QModelIndex index = selection.at(0);
 
-                //row selected
-                int row = index.row();
+            //row selected
+            int row = index.row();
 
-                loeschen(row);
-                tabellenansicht();
-
-            }
+            loeschen(row);
+            tabellenansicht();
         }
+    }
 }
 
 void Player::loeschen(int pos)
@@ -184,6 +183,9 @@ void Player::lied_hinzufuegen(QUrl url)
     tempplayer->setMedia(url);
     tempplayer->play();
     liste_tempplayer.append(tempplayer);
+    QStringList list = url.toString().split(QLatin1Char('/'));
+    QString dateiname = list[list.size() - 1];
+    lied_erstellen(url.toString())->setTitle(dateiname);
 
     auto conn = std::make_shared<QMetaObject::Connection>();
     *conn = connect(tempplayer, QOverload<>::of(&QMediaPlayer::metaDataChanged), [=]() {
@@ -295,7 +297,7 @@ void Player::stummschalten()
 
     if(ui->stumm_button->isChecked())
     {
-        ui->stumm_button->setStyleSheet("background-color: green");
+        ui->stumm_button->setStyleSheet("background-color: #0099FF");
     }
     else
     {
@@ -409,6 +411,9 @@ Datei_info *Player::lied_erstellen(QString url)
 
     if (info == nullptr) {
         info = new Datei_info();
+        info->setTitle("-");
+        info->setArtist("-");
+        info->setAlbum("-");
         Liedersammlung[url] = info;
     }
 
