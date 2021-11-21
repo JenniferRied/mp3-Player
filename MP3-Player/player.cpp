@@ -75,6 +75,7 @@ Player::Player(QWidget *parent)
     QShortcut *pause_play = new QShortcut(QKeySequence(Qt::Key_Space), this);
     QShortcut *stop = new QShortcut(QKeySequence("Ctrl+X"), this);
     QShortcut *mute = new QShortcut(QKeySequence("Ctrl+M"), this);
+    QShortcut *random = new QShortcut(QKeySequence("Ctrl+R"), this);
 
     //ToolTips
     ui->wiedergabe_pause_button->setToolTip("Wiedergabe/Pause");
@@ -108,6 +109,7 @@ Player::Player(QWidget *parent)
     connect(ui->zurueckspringen_button, SIGNAL(clicked()), this, SLOT(vorheriges_lied()));
     connect(previous, SIGNAL(activated()), this, SLOT(vorheriges_lied()));
     connect(ui->zufall_button,SIGNAL(clicked()), this, SLOT(zufallslied()));
+    connect(random, SIGNAL(activated()), this, SLOT(zufallslied()));
     connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,this, &Player::lied_ausgewahlt);
     connect(ui->tableWidget,SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(customcontextmenu(QPoint)));
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
