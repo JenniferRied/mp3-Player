@@ -163,6 +163,7 @@ static bool ist_playlist(const QUrl &url)
 
 void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
 {
+    liste_tempplayer_leeren();
     for (auto &url: urls) {
         if (ist_playlist(url))
         {
@@ -182,6 +183,7 @@ void Player::lied_hinzufuegen(QUrl url)
     QMediaPlayer *tempplayer = new QMediaPlayer(this);
     tempplayer->setMedia(url);
     tempplayer->play();
+    liste_tempplayer.append(tempplayer);
 
     auto conn = std::make_shared<QMetaObject::Connection>();
     *conn = connect(tempplayer, QOverload<>::of(&QMediaPlayer::metaDataChanged), [=]() {
@@ -212,8 +214,16 @@ void Player::lied_hinzufuegen(QUrl url)
 
         tabellenansicht();
         tempplayer->stop();
-        tempplayer->deleteLater();
     });
+}
+
+void Player::liste_tempplayer_leeren()
+{
+    for(QMediaPlayer *tempplayer: liste_tempplayer)
+    {
+        tempplayer->deleteLater();
+    }
+    liste_tempplayer.clear();
 }
 
 void Player::stopp()

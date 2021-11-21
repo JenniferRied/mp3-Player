@@ -53,10 +53,12 @@ private:
     int pos;
 
     void lied_hinzufuegen(QUrl);
+    void liste_tempplayer_leeren();
     bool ist_treffer(const QString& zeilenInhalt, const QString& suchVorgabe);
     void tabellenansicht();
     Datei_info* lied_erstellen(QString url);
 
+    QList<QMediaPlayer*> liste_tempplayer;
     QMap<QString,Datei_info*> Liedersammlung;
 };
 #endif // PLAYER_H
