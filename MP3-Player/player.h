@@ -44,6 +44,7 @@ public slots:
     void sortieren(int);
     void shortcut_zufallslied();
     void shortcut_stummschalten();
+    void daten_laden();
 
 private:
     Ui::Player *ui;

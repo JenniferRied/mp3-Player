@@ -117,7 +117,44 @@ Player::Player(QWidget *parent)
     connect(ui->tableWidget->horizontalHeader(), &QHeaderView::sectionClicked, this, &Player::sortieren);
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget->setVisible(false);
+    daten_laden();
     tabellenansicht();
+}
+
+void Player::daten_laden()
+{
+    QList<QUrl> urls;
+    QString dateiname = "Dateien.json";
+    QFileInfo datei(dateiname);
+
+    if (datei.exists())
+    {
+        QFile song_datei(dateiname);
+
+
+        if (!song_datei.open(QIODevice::ReadOnly))
+        {
+            QMessageBox fehlermeldung;
+            fehlermeldung.critical(0, "Fehler", "Ein Fehler beim Öffnen der Datei ist aufgetreten.");
+            return;
+        }
+
+        QJsonObject json = QJsonDocument::fromJson(song_datei.readAll()).object();
+
+        QJsonArray jsonDateien = json["dateien"].toArray();
+
+
+        for (int j = 0; j<jsonDateien.size(); j ++)
+        {
+            QJsonObject jsonSong = jsonDateien[j].toObject();
+            QString line = jsonSong["url"].toString();
+            std::cout<<line.toStdString()<<std::endl;
+            QUrl url(line);
+            urls.append(url);
+        }
+    }
+   hinzufugen_zur_playlist(urls);
+
 }
 
 void Player::shortcut_zufallslied()
@@ -163,8 +200,6 @@ void Player::customcontextmenu(const QPoint &pos)
 
             //row selected
             int row = index.row();
-
-            Liedersammlung.remove(playlist->media(row).canonicalUrl().toString());
             loeschen(row);
             tabellenansicht();
         }
@@ -208,7 +243,6 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
         {
             QMessageBox fehlermeldung;
             fehlermeldung.critical(0, "Fehler", "Die ausgewählte Datei ist keine MP3-Datei!");
-
         }
         else
         {
@@ -232,6 +266,7 @@ void Player::lied_hinzufuegen(QUrl url)
     QMediaPlayer *tempplayer = new QMediaPlayer(this);
     tempplayer->setMedia(url);
     tempplayer->play();
+    tempplayer->setMuted(true);
     liste_tempplayer.append(tempplayer);
     QStringList list = url.toString().split(QLatin1Char('/'));
     QString dateiname = list[list.size() - 1];
@@ -478,7 +513,7 @@ void Player::tabellenansicht()
         QTableWidgetItem *laenge = new QTableWidgetItem(Daten->getLength());
         ui->tableWidget->setItem(lieder_nr,3,laenge);
         QTableWidgetItem *url = new QTableWidgetItem(Daten->getUrl().toString());
-        ui->tableWidget->setItem(lieder_nr,3,url);
+        ui->tableWidget->setItem(lieder_nr,4,url);
     }
 
     ui->tableWidget->verticalHeader()->setSectionsMovable(true);
