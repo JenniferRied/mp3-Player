@@ -112,6 +112,7 @@ Player::Player(QWidget *parent)
     connect(random, SIGNAL(activated()), this, SLOT(zufallslied()));
     connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,this, &Player::lied_ausgewahlt);
     connect(ui->tableWidget,SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(customcontextmenu(QPoint)));
+
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget->setVisible(false);
     tabellenansicht();
@@ -432,10 +433,18 @@ void Player::tabellenansicht()
         QTableWidgetItem *laenge = new QTableWidgetItem(Daten->getLength());
         ui->tableWidget->setItem(lieder_nr,3,laenge);
     }
-
+    auto header_titel = ui->tableWidget->horizontalHeader();
+    connect(header_titel, &QHeaderView::sectionClicked, [this](int logicalIndex){
+       std::cout<<logicalIndex<<std::endl;
+    });
     ui->tableWidget->verticalHeader()->setSectionsMovable(true);
     ui->tableWidget->verticalHeader()->setDragEnabled(true);
     ui->tableWidget->verticalHeader()->setDragDropMode(QAbstractItemView::InternalMove);
+}
+
+void Player::sortieren(int i)
+{
+
 }
 
 Datei_info *Player::lied_erstellen(QString url)

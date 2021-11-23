@@ -40,6 +40,7 @@ public slots:
     void lied_ausgewahlt(int zeile, int spalte);
     void loeschen(int);
     void customcontextmenu(const QPoint& pos);
+    void sortieren(int);
 
 private:
     Ui::Player *ui;
