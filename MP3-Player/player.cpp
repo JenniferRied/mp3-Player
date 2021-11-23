@@ -76,8 +76,6 @@ Player::Player(QWidget *parent)
     QShortcut *mute = new QShortcut(QKeySequence("Ctrl+M"), this);
     QShortcut *random = new QShortcut(QKeySequence("Ctrl+R"), this);
 
-
-
     //ToolTips
     ui->wiedergabe_pause_button->setToolTip("Wiedergabe/Pause");
     ui->zurueckspulen_button->setToolTip("Zurückspulen");
@@ -115,6 +113,7 @@ Player::Player(QWidget *parent)
     connect(ui->tableWidget,SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(customcontextmenu(QPoint)));
     connect(ui->tableWidget->verticalHeader(), &QHeaderView::sectionMoved, this, &Player::bewegt);
     connect(ui->tableWidget->horizontalHeader(), &QHeaderView::sectionClicked, this, &Player::sortieren);
+
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget->setVisible(false);
     daten_laden();
@@ -131,7 +130,6 @@ void Player::daten_laden()
     {
         QFile song_datei(dateiname);
 
-
         if (!song_datei.open(QIODevice::ReadOnly))
         {
             QMessageBox fehlermeldung;
@@ -140,26 +138,21 @@ void Player::daten_laden()
         }
 
         QJsonObject json = QJsonDocument::fromJson(song_datei.readAll()).object();
-
         QJsonArray jsonDateien = json["dateien"].toArray();
-
 
         for (int j = 0; j<jsonDateien.size(); j ++)
         {
             QJsonObject jsonSong = jsonDateien[j].toObject();
             QString line = jsonSong["url"].toString();
-            std::cout<<line.toStdString()<<std::endl;
             QUrl url(line);
             urls.append(url);
         }
     }
    hinzufugen_zur_playlist(urls);
-
 }
 
 void Player::shortcut_zufallslied()
 {
-
     if(!ui->zufall_button->isChecked())
     {
         ui->zufall_button->setChecked(true);
@@ -197,11 +190,8 @@ void Player::customcontextmenu(const QPoint &pos)
 
         if (selection.count() > 0) {
             QModelIndex index = selection.at(0);
-
-            //row selected
             int row = index.row();
             loeschen(row);
-            tabellenansicht();
         }
     }
 }
@@ -210,6 +200,7 @@ void Player::loeschen(int pos)
 {
     playlist->removeMedia(pos);
     daten_speichern();
+    tabellenansicht();
 }
 
 void Player::oeffnen()
@@ -220,7 +211,9 @@ void Player::oeffnen()
     hinzufuegen.setDirectory(QStandardPaths::standardLocations(QStandardPaths::MusicLocation).value(0,QDir::homePath()));
     hinzufuegen.setFileMode(QFileDialog::ExistingFiles);
     if (hinzufuegen.exec() == QDialog::Accepted)
+    {
         hinzufugen_zur_playlist(hinzufuegen.selectedUrls());
+    }
 }
 
 static bool ist_playlist(const QUrl &url)
@@ -254,6 +247,7 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
             {
                 playlist->addMedia(url);
             }
+
             lied_hinzufuegen(url);
         }
     }
@@ -281,6 +275,7 @@ void Player::lied_hinzufuegen(QUrl url)
             QString album = tempplayer->metaData(QMediaMetaData::AlbumTitle).toString();
             QString artist = tempplayer->metaData(QMediaMetaData::ContributingArtist).toString();
             Datei_info* info = lied_erstellen(url.toString());
+
             if(!titel.isEmpty())
             {
                 info->setTitle(titel);
@@ -511,11 +506,15 @@ void Player::tabellenansicht()
         QTableWidgetItem *kuenstler = new QTableWidgetItem(Daten->getArtist());
         ui->tableWidget->setItem(lieder_nr,2,kuenstler);
         QTableWidgetItem *laenge = new QTableWidgetItem(Daten->getLength());
+        laenge->setTextAlignment(Qt::AlignCenter);
         ui->tableWidget->setItem(lieder_nr,3,laenge);
         QTableWidgetItem *url = new QTableWidgetItem(Daten->getUrl().toString());
         ui->tableWidget->setItem(lieder_nr,4,url);
     }
 
+    ui->tableWidget->horizontalHeader()->setMinimumSectionSize(1);
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
+    ui->tableWidget->setColumnWidth(3,90);
     ui->tableWidget->verticalHeader()->setSectionsMovable(true);
     ui->tableWidget->verticalHeader()->setDragEnabled(true);
     ui->tableWidget->verticalHeader()->setDragDropMode(QAbstractItemView::InternalMove);
@@ -523,13 +522,33 @@ void Player::tabellenansicht()
 
 void Player::sortieren(int i)
 {
-    std::cout<< i <<std::endl;
+    Q_UNUSED(i);
+    playlist->clear();
+
+    for (int zeile = 0; zeile < ui->tableWidget->rowCount(); zeile++)
+    {
+        QString url_string = ui->tableWidget->item(zeile,4)->text();
+        QUrl url(url_string);
+
+        if (ist_playlist(url))
+        {
+            playlist->load(url);
+        }
+        else
+        {
+            playlist->addMedia(url);
+        }
+    }
+
+    ui->wiedergabe_pause_button->setIcon(*pause);
+    player->play();
+    wird_wiedergeben = true;
 }
 
 void Player::bewegt(int logischer_index, int alter_index, int neuer_index)
 {
-    QString url_string = ui->tableWidget->item(alter_index, 4)->text();
-    std::cout<< logischer_index << "    " << alter_index << "   " << neuer_index <<std::endl;
+    Q_UNUSED(logischer_index);
+    playlist->moveMedia(alter_index, neuer_index);
 }
 
 Datei_info *Player::lied_erstellen(QString url)
@@ -550,8 +569,7 @@ Datei_info *Player::lied_erstellen(QString url)
 void Player::lied_ausgewahlt(int zeile, int spalte)
 {
     Q_UNUSED(spalte);
-    int liednr = ui->tableWidget->item(zeile, 0)->text().toInt();
-    playlist->setCurrentIndex(liednr);
+    playlist->setCurrentIndex(zeile);
 }
 
 QJsonObject Player::json_erstellen()
