@@ -161,6 +161,7 @@ static bool ist_playlist(const QUrl &url)
     if (!url.isLocalFile())
         return false;
     const QFileInfo fileInfo(url.toLocalFile());
+
     return fileInfo.exists() && !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
 }
 
@@ -168,6 +169,14 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
 {
     liste_tempplayer_leeren();
     for (auto &url: urls) {
+        const QFileInfo fileInfo(url.toLocalFile());
+        QString Name = fileInfo.fileName();
+        if(!Name.contains(".mp3"))
+        {
+            QMessageBox fehlermeldung;
+            fehlermeldung.critical(0, "Fehler", "Die ausgewählte Datei ist keine MP3-Datei!");
+
+        }
         if (ist_playlist(url))
         {
             playlist->load(url);
