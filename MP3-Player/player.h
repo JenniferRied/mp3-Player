@@ -42,6 +42,8 @@ public slots:
     void loeschen(int);
     void customcontextmenu(const QPoint& pos);
     void sortieren(int);
+    void shortcut_zufallslied();
+    void shortcut_stummschalten();
 
 private:
     Ui::Player *ui;

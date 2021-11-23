@@ -77,6 +77,8 @@ Player::Player(QWidget *parent)
     QShortcut *mute = new QShortcut(QKeySequence("Ctrl+M"), this);
     QShortcut *random = new QShortcut(QKeySequence("Ctrl+R"), this);
 
+
+
     //ToolTips
     ui->wiedergabe_pause_button->setToolTip("Wiedergabe/Pause");
     ui->zurueckspulen_button->setToolTip("Zurückspulen");
@@ -103,19 +105,48 @@ Player::Player(QWidget *parent)
     connect(ui->aktuelle_wiedergabe_slider, &QSlider::sliderMoved,this, &Player::geaenderte_position);
     connect(ui->lautstaerke_slider, &QSlider::sliderMoved, this, &Player::lautstaerke_slider);
     connect(ui->stumm_button, SIGNAL(clicked()), this, SLOT(stummschalten()));
-    connect(mute, SIGNAL(activated()), this, SLOT(stummschalten()));
+    connect(mute, SIGNAL(activated()), this, SLOT(shortcut_stummschalten()));
     connect(ui->weiter_button, SIGNAL(clicked()), this, SLOT(naechstes_lied()));
     connect(skip, SIGNAL(activated()), this, SLOT(naechstes_lied()));
     connect(ui->zurueckspringen_button, SIGNAL(clicked()), this, SLOT(vorheriges_lied()));
     connect(previous, SIGNAL(activated()), this, SLOT(vorheriges_lied()));
     connect(ui->zufall_button,SIGNAL(clicked()), this, SLOT(zufallslied()));
-    connect(random, SIGNAL(activated()), this, SLOT(zufallslied()));
+    connect(random, SIGNAL(activated()), this, SLOT(shortcut_zufallslied()));
     connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,this, &Player::lied_ausgewahlt);
     connect(ui->tableWidget,SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(customcontextmenu(QPoint)));
 
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget->setVisible(false);
     tabellenansicht();
+}
+
+void Player::shortcut_zufallslied()
+{
+
+    if(!ui->zufall_button->isChecked())
+    {
+        ui->zufall_button->setChecked(true);
+    }
+    else
+    {
+        ui->zufall_button->setChecked(false);
+    }
+
+    zufallslied();
+}
+
+void Player::shortcut_stummschalten()
+{
+    if(!ui->stumm_button->isChecked())
+    {
+        ui->stumm_button->setChecked(true);
+    }
+    else
+    {
+        ui->stumm_button->setChecked(false);
+    }
+
+    stummschalten();
 }
 
 void Player::customcontextmenu(const QPoint &pos)
