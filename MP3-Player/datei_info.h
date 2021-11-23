@@ -2,6 +2,7 @@
 #define DATEI_INFO_H
 #include <QString>
 #include <QUrl>
+#include <QJsonObject>
 
 class Datei_info
 {
@@ -34,6 +35,8 @@ public:
     QUrl getUrl() const;
     void setUrl(const QUrl &value);
 
+    void write(QJsonObject &json) const;
+
 private:
     //Variablen
     QString title;
@@ -43,5 +46,4 @@ private:
     int id;
     QUrl url;
 };
-
 #endif // DATEI_INFO_H

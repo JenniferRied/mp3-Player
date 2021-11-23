@@ -70,3 +70,11 @@ void Datei_info::setUrl(const QUrl &value)
 {
     url = value;
 }
+
+void Datei_info::write(QJsonObject &json) const
+{
+    json["titel"] = title;
+    json["artist"] = artist;
+    json["ablum"] = album;
+    json["url"] = url.toString();
+}

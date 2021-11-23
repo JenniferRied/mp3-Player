@@ -21,6 +21,7 @@ public:
     ~Player();
 
     void hinzufugen_zur_playlist(const QList<QUrl> &urls);
+    QJsonObject json_erstellen (QList<Datei_info*> Liedersammlung);
 
 public slots:
     void wiedergabe();
@@ -58,6 +59,7 @@ private:
     bool ist_treffer(const QString& zeilenInhalt, const QString& suchVorgabe);
     void tabellenansicht();
     Datei_info* lied_erstellen(QString url);
+    void daten_speichern();
 
     QList<QMediaPlayer*> liste_tempplayer;
     QMap<QString,Datei_info*> Liedersammlung;

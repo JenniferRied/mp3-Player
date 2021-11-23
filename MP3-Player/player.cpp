@@ -143,6 +143,7 @@ void Player::customcontextmenu(const QPoint &pos)
 void Player::loeschen(int pos)
 {
     playlist->removeMedia(pos);
+    daten_speichern();
 }
 
 void Player::oeffnen()
@@ -180,6 +181,7 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
     }
     playlist->setPlaybackMode(QMediaPlaylist::Loop);
     wiedergabe();
+    daten_speichern();
 }
 
 void Player::lied_hinzufuegen(QUrl url)
@@ -467,6 +469,39 @@ void Player::lied_ausgewahlt(int zeile, int spalte)
     Q_UNUSED(spalte);
     int liednr = ui->tableWidget->item(zeile, 0)->text().toInt();
     playlist->setCurrentIndex(liednr);
+}
+
+QJsonObject Player::json_erstellen(QList<Datei_info*> Liedersammlung)
+{
+    QJsonArray json_dateien;
+    for (Datei_info* datei : Liedersammlung)
+    {
+        QJsonObject json_datei;
+        datei->write(json_datei);
+        json_dateien.append(json_datei);
+    }
+
+    QJsonObject json;
+    json["dateien"] = json_dateien;
+
+    return json;
+}
+
+void Player::daten_speichern()
+{
+    QString dateiname = "Dateien.json";
+    QFile song_datei(dateiname);
+
+    if (!song_datei.open(QIODevice::WriteOnly))
+    {
+        QMessageBox fehlermeldung;
+        fehlermeldung.critical(0, "Fehler", "Ein Fehler beim Öffnen der Datei ist aufgetreten.");
+        return;
+    }
+
+    QJsonObject json = json_erstellen(Liedersammlung.values());
+
+    song_datei.write(QJsonDocument(json).toJson(QJsonDocument::Indented));
 }
 
 Player::~Player()
