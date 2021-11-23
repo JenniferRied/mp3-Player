@@ -13,7 +13,6 @@
 Player::Player(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Player)
-    , letzte_id(1)
 {
     ui->setupUi(this);
     player = new QMediaPlayer(this);
@@ -114,7 +113,8 @@ Player::Player(QWidget *parent)
     connect(random, SIGNAL(activated()), this, SLOT(shortcut_zufallslied()));
     connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,this, &Player::lied_ausgewahlt);
     connect(ui->tableWidget,SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(customcontextmenu(QPoint)));
-
+    connect(ui->tableWidget->verticalHeader(), &QHeaderView::sectionMoved, this, &Player::bewegt);
+    connect(ui->tableWidget->horizontalHeader(), &QHeaderView::sectionClicked, this, &Player::sortieren);
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget->setVisible(false);
     tabellenansicht();
@@ -167,7 +167,6 @@ void Player::customcontextmenu(const QPoint &pos)
             Liedersammlung.remove(playlist->media(row).canonicalUrl().toString());
             loeschen(row);
             tabellenansicht();
-
         }
     }
 }
@@ -211,20 +210,21 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
             fehlermeldung.critical(0, "Fehler", "Die ausgewählte Datei ist keine MP3-Datei!");
 
         }
-        if (ist_playlist(url))
-        {
-            playlist->load(url);
-        }
         else
         {
-            playlist->addMedia(url);
+            if (ist_playlist(url))
+            {
+                playlist->load(url);
+            }
+            else
+            {
+                playlist->addMedia(url);
+            }
+            lied_hinzufuegen(url);
         }
-        lied_hinzufuegen(url);
-
     }
     playlist->setPlaybackMode(QMediaPlaylist::Loop);
     wiedergabe();
-
 }
 
 void Player::lied_hinzufuegen(QUrl url)
@@ -237,7 +237,6 @@ void Player::lied_hinzufuegen(QUrl url)
     QString dateiname = list[list.size() - 1];
     Datei_info* info = lied_erstellen(url.toString());
     info->setTitle(dateiname);
-    info->setId(letzte_id++);
 
     auto conn = std::make_shared<QMetaObject::Connection>();
     *conn = connect(tempplayer, QOverload<>::of(&QMediaPlayer::metaDataChanged), [=]() {
@@ -263,8 +262,6 @@ void Player::lied_hinzufuegen(QUrl url)
             {
                 info->setUrl(url);
             }
-
-
 
             tabellenansicht();
             daten_speichern();
@@ -448,16 +445,18 @@ bool Player::ist_treffer(const QString &zeilenInhalt, const QString &suchVorgabe
 
 void Player::tabellenansicht()
 {
-    Datei_info leer("", "", "", "", 0, QUrl(""));
+    Datei_info leer("", "", "", "", QUrl(""));
 
     ui->tableWidget->setRowCount(playlist->mediaCount());
-    ui->tableWidget->setColumnCount(4);
+    ui->tableWidget->setColumnCount(5);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     ui->tableWidget->setHorizontalHeaderItem(0,new QTableWidgetItem("Titel"));
     ui->tableWidget->setHorizontalHeaderItem(1,new QTableWidgetItem("Album"));
     ui->tableWidget->setHorizontalHeaderItem(2,new QTableWidgetItem("Künstler"));
     ui->tableWidget->setHorizontalHeaderItem(3,new QTableWidgetItem("Länge"));
+    ui->tableWidget->setHorizontalHeaderItem(4,new QTableWidgetItem("Url"));
+    ui->tableWidget->hideColumn(4);
 
     for (int lieder_nr = 0; lieder_nr < playlist->mediaCount(); lieder_nr++)
     {
@@ -478,11 +477,10 @@ void Player::tabellenansicht()
         ui->tableWidget->setItem(lieder_nr,2,kuenstler);
         QTableWidgetItem *laenge = new QTableWidgetItem(Daten->getLength());
         ui->tableWidget->setItem(lieder_nr,3,laenge);
+        QTableWidgetItem *url = new QTableWidgetItem(Daten->getUrl().toString());
+        ui->tableWidget->setItem(lieder_nr,3,url);
     }
-    auto header_titel = ui->tableWidget->horizontalHeader();
-    connect(header_titel, &QHeaderView::sectionClicked, [this](int logicalIndex){
-       std::cout<<logicalIndex<<std::endl;
-    });
+
     ui->tableWidget->verticalHeader()->setSectionsMovable(true);
     ui->tableWidget->verticalHeader()->setDragEnabled(true);
     ui->tableWidget->verticalHeader()->setDragDropMode(QAbstractItemView::InternalMove);
@@ -490,7 +488,13 @@ void Player::tabellenansicht()
 
 void Player::sortieren(int i)
 {
+    std::cout<< i <<std::endl;
+}
 
+void Player::bewegt(int logischer_index, int alter_index, int neuer_index)
+{
+    QString url_string = ui->tableWidget->item(alter_index, 4)->text();
+    std::cout<< logischer_index << "    " << alter_index << "   " << neuer_index <<std::endl;
 }
 
 Datei_info *Player::lied_erstellen(QString url)
@@ -515,13 +519,15 @@ void Player::lied_ausgewahlt(int zeile, int spalte)
     playlist->setCurrentIndex(liednr);
 }
 
-QJsonObject Player::json_erstellen(QList<Datei_info*> Liedersammlung)
+QJsonObject Player::json_erstellen()
 {
     QJsonArray json_dateien;
-    for (Datei_info* datei : Liedersammlung)
+
+    for (int i = 0; i < playlist->mediaCount(); i++)
     {
+        QUrl url = playlist->media(i).canonicalUrl();
         QJsonObject json_datei;
-        datei->write(json_datei);
+        json_datei["url"] = url.toString();
         json_dateien.append(json_datei);
     }
 
@@ -543,7 +549,7 @@ void Player::daten_speichern()
         return;
     }
 
-    QJsonObject json = json_erstellen(Liedersammlung.values());
+    QJsonObject json = json_erstellen();
 
     song_datei.write(QJsonDocument(json).toJson(QJsonDocument::Indented));
 }

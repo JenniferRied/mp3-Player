@@ -21,7 +21,6 @@ public:
     ~Player();
 
     void hinzufugen_zur_playlist(const QList<QUrl> &urls);
-    QJsonObject json_erstellen (QList<Datei_info*> Liedersammlung);
 
 public slots:
     void wiedergabe();
@@ -41,6 +40,7 @@ public slots:
     void lied_ausgewahlt(int zeile, int spalte);
     void loeschen(int);
     void customcontextmenu(const QPoint& pos);
+    void bewegt(int logic, int alt, int neu);
     void sortieren(int);
     void shortcut_zufallslied();
     void shortcut_stummschalten();
@@ -53,7 +53,6 @@ private:
     bool wird_wiedergeben = false;
     QIcon* pause;
     QIcon* wiedergabe_Icon;
-    int letzte_id;
     int pos;
 
     void lied_hinzufuegen(QUrl);
@@ -62,6 +61,7 @@ private:
     void tabellenansicht();
     Datei_info* lied_erstellen(QString url);
     void daten_speichern();
+    QJsonObject json_erstellen ();
 
     QList<QMediaPlayer*> liste_tempplayer;
     QMap<QString,Datei_info*> Liedersammlung;

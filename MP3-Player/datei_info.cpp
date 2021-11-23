@@ -5,8 +5,8 @@ Datei_info::Datei_info()
 
 }
 
-Datei_info::Datei_info( QString title, QString artist, QString album, QString length, int id, QUrl url)
-    :title(title), artist(artist), album(album), length(length), id(id), url(url)
+Datei_info::Datei_info( QString title, QString artist, QString album, QString length, QUrl url)
+    :title(title), artist(artist), album(album), length(length), url(url)
 {
 
 }
@@ -51,16 +51,6 @@ void Datei_info::setLength(const QString &value)
     length = value;
 }
 
-int Datei_info::getId() const
-{
-    return id;
-}
-
-void Datei_info::setId(int value)
-{
-    id = value;
-}
-
 QUrl Datei_info::getUrl() const
 {
     return url;
@@ -69,12 +59,4 @@ QUrl Datei_info::getUrl() const
 void Datei_info::setUrl(const QUrl &value)
 {
     url = value;
-}
-
-void Datei_info::write(QJsonObject &json) const
-{
-    json["titel"] = title;
-    json["artist"] = artist;
-    json["ablum"] = album;
-    json["url"] = url.toString();
 }

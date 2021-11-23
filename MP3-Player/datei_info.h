@@ -12,7 +12,6 @@ public:
         QString artist,
         QString album,
         QString length,
-        int id,
         QUrl url
         );
     Datei_info();
@@ -29,13 +28,8 @@ public:
     QString getLength() const;
     void setLength(const QString &value);
 
-    int getId() const;
-    void setId(int value);
-
     QUrl getUrl() const;
     void setUrl(const QUrl &value);
-
-    void write(QJsonObject &json) const;
 
 private:
     //Variablen
@@ -43,7 +37,6 @@ private:
     QString artist;
     QString album;
     QString length;
-    int id;
     QUrl url;
 };
 #endif // DATEI_INFO_H
