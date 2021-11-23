@@ -177,6 +177,7 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
         }
         lied_hinzufuegen(url);
     }
+    playlist->setPlaybackMode(QMediaPlaylist::Loop);
     wiedergabe();
 }
 
@@ -200,10 +201,24 @@ void Player::lied_hinzufuegen(QUrl url)
             QString album = tempplayer->metaData(QMediaMetaData::AlbumTitle).toString();
             QString artist = tempplayer->metaData(QMediaMetaData::ContributingArtist).toString();
             Datei_info* info = lied_erstellen(url.toString());
-            info->setTitle(titel);
-            info->setArtist(artist);
-            info->setAlbum(album);
-            info->setUrl(url);
+            if(!titel.isEmpty())
+            {
+                info->setTitle(titel);
+            }
+            if(!artist.isEmpty())
+            {
+                info->setArtist(artist);
+            }
+            if(!album.isEmpty())
+            {
+                info->setAlbum(album);
+            }
+            if(!url.isEmpty())
+            {
+                info->setUrl(url);
+            }
+
+
 
             tabellenansicht();
         }
@@ -337,7 +352,17 @@ void Player::naechstes_lied()
 
 void Player::zufallslied()
 {
-    playlist->setPlaybackMode(QMediaPlaylist::Random);
+    if(ui->zufall_button->isChecked())
+    {
+        ui->zufall_button->setStyleSheet("background-color: #0099FF");
+        playlist->setPlaybackMode(QMediaPlaylist::Random);
+    }
+    else
+    {
+        ui->zufall_button->setStyleSheet("background-color: white");
+        playlist->setPlaybackMode(QMediaPlaylist::Loop);
+    }
+
 }
 
 void Player::suche()
