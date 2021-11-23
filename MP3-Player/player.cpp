@@ -167,6 +167,7 @@ void Player::customcontextmenu(const QPoint &pos)
             Liedersammlung.remove(playlist->media(row).canonicalUrl().toString());
             loeschen(row);
             tabellenansicht();
+
         }
     }
 }
@@ -200,6 +201,7 @@ static bool ist_playlist(const QUrl &url)
 void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
 {
     liste_tempplayer_leeren();
+
     for (auto &url: urls) {
         const QFileInfo fileInfo(url.toLocalFile());
         QString Name = fileInfo.fileName();
@@ -218,10 +220,11 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
             playlist->addMedia(url);
         }
         lied_hinzufuegen(url);
+
     }
     playlist->setPlaybackMode(QMediaPlaylist::Loop);
     wiedergabe();
-    daten_speichern();
+
 }
 
 void Player::lied_hinzufuegen(QUrl url)
@@ -264,6 +267,7 @@ void Player::lied_hinzufuegen(QUrl url)
 
 
             tabellenansicht();
+            daten_speichern();
         }
     });
 
