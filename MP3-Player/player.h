@@ -49,7 +49,7 @@ private:
     bool wird_wiedergeben = false;
     QIcon* pause;
     QIcon* wiedergabe_Icon;
-    QAtomicInt letzte_id;
+    int letzte_id;
     int pos;
 
     void lied_hinzufuegen(QUrl);

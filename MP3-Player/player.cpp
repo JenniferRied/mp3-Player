@@ -132,6 +132,7 @@ void Player::customcontextmenu(const QPoint &pos)
             //row selected
             int row = index.row();
 
+            Liedersammlung.remove(playlist->media(row).canonicalUrl().toString());
             loeschen(row);
             tabellenansicht();
         }
@@ -187,7 +188,9 @@ void Player::lied_hinzufuegen(QUrl url)
     liste_tempplayer.append(tempplayer);
     QStringList list = url.toString().split(QLatin1Char('/'));
     QString dateiname = list[list.size() - 1];
-    lied_erstellen(url.toString())->setTitle(dateiname);
+    Datei_info* info = lied_erstellen(url.toString());
+    info->setTitle(dateiname);
+    info->setId(letzte_id++);
 
     auto conn = std::make_shared<QMetaObject::Connection>();
     *conn = connect(tempplayer, QOverload<>::of(&QMediaPlayer::metaDataChanged), [=]() {
@@ -201,7 +204,6 @@ void Player::lied_hinzufuegen(QUrl url)
             info->setArtist(artist);
             info->setAlbum(album);
             info->setUrl(url);
-            info->setId(letzte_id++);
 
             tabellenansicht();
         }
