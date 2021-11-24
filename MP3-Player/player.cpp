@@ -20,6 +20,7 @@ Player::Player(QWidget *parent)
     playlist = new QMediaPlaylist();
     player->setPlaylist(playlist);
     ui->aktuelle_wiedergabe_slider->setRange(0, player->duration()/ 1000);
+
     //Icons
 
     //https://www.flaticon.com/de/kostenloses-icon/wiedergabetaste_149668?term=play&page=1&position=2&page=1&position=2&related_id=149668&origin=search
@@ -69,6 +70,7 @@ Player::Player(QWidget *parent)
     ui->stumm_button->setIconSize(iconSize);
 
     //Shortcuts
+
     QShortcut *skip = new QShortcut(QKeySequence(Qt::Key_Right), this);
     QShortcut *previous = new QShortcut(QKeySequence(Qt::Key_Left), this);
     QShortcut *pause_play = new QShortcut(QKeySequence(Qt::Key_Space), this);
@@ -86,6 +88,7 @@ Player::Player(QWidget *parent)
     ui->stopp_button->setToolTip("Stopp");
     ui->stumm_button->setToolTip("Stumm schalten");
 
+    //Verknüpfung der Oberflächenelemente und Shortcuts mit den Funktionen
 
     connect(ui->menuSuche, &QAction::triggered, this, &Player::suche);
     connect(ui->titel_lineEdit, &QLineEdit::textChanged, this, &Player::suche_starten);
@@ -114,11 +117,14 @@ Player::Player(QWidget *parent)
     connect(ui->tableWidget->verticalHeader(), &QHeaderView::sectionMoved, this, &Player::bewegt);
     connect(ui->tableWidget->horizontalHeader(), &QHeaderView::sectionClicked, this, &Player::sortieren);
 
+
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget->setVisible(false);
     daten_laden();
     tabellenansicht();
 }
+
+//Hier werden falls vohanden Lieder, die in der json Datei gespeichert wurden, in die Playliste hinzugefügt
 
 void Player::daten_laden()
 {
@@ -151,6 +157,8 @@ void Player::daten_laden()
    hinzufugen_zur_playlist(urls);
 }
 
+//Hier wird der Button durch den verwendeten Shortcut auf Checked oder nicht Checked gesetzt
+
 void Player::shortcut_zufallslied()
 {
     if(!ui->zufall_button->isChecked())
@@ -165,6 +173,8 @@ void Player::shortcut_zufallslied()
     zufallslied();
 }
 
+//Hier wird der Button durch den verwendeten Shortcut auf Checked oder nicht Checked gesetzt
+
 void Player::shortcut_stummschalten()
 {
     if(!ui->stumm_button->isChecked())
@@ -178,6 +188,8 @@ void Player::shortcut_stummschalten()
 
     stummschalten();
 }
+
+//Hier wird das ContextMenu, das beim rechtsklick auf das tableWidget erscheint erstellt
 
 void Player::customcontextmenu(const QPoint &pos)
 {
@@ -195,6 +207,8 @@ void Player::customcontextmenu(const QPoint &pos)
         }
     }
 }
+
+//Diese Funktion löscht einen Eintrag an der ausgewählten Position aus der Playliste gelöscht
 
 void Player::loeschen(int pos)
 {
@@ -232,6 +246,8 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
     for (auto &url: urls) {
         const QFileInfo fileInfo(url.toLocalFile());
         QString Name = fileInfo.fileName();
+
+        //Überprüft ob ausgewählte Datei mp3 Datei ist
         if(!Name.contains(".mp3"))
         {
             QMessageBox fehlermeldung;
@@ -374,13 +390,19 @@ void Player::geaenderte_zeit(qint64 progress)
     ui->bisherige_dauer_label->setText(spielte.toString("mm:ss"));
 }
 
+//Hier wird die Lautstärke auf den Wert der Position des Sliders gesetzt
+
 void Player::lautstaerke_slider(int position)
 {
     player->setVolume(position);
+    lautstaerke = ui->lautstaerke_slider->value();
 }
 
+/*Hier wird die Lautstärker auf 0 gesetzt, sofern sie vorher größer als 0 war. Ist die Lauststärke bereits
+0, so wird die Lautstärke auf die vorherige Lautstärke gesetzt*/
 void Player::stummschalten()
 {
+
     if(ui->lautstaerke_slider->value() != 0)
     {
         player->setVolume(0);
@@ -388,8 +410,8 @@ void Player::stummschalten()
     }
     else
     {
-        player->setVolume(100);
-        ui->lautstaerke_slider->setValue(100);
+        player->setVolume(lautstaerke);
+        ui->lautstaerke_slider->setValue(lautstaerke);
     }
 
     if(ui->stumm_button->isChecked())
@@ -402,6 +424,8 @@ void Player::stummschalten()
     }
 }
 
+//Hier wird das vorherige Lied abgespielt
+
 void Player::vorheriges_lied()
 {
     playlist->previous();
@@ -413,6 +437,8 @@ void Player::vorheriges_lied()
     }
 }
 
+//Hier wird das nächste Lied abgespielt
+
 void Player::naechstes_lied()
 {
     playlist->next();
@@ -423,6 +449,8 @@ void Player::naechstes_lied()
         wird_wiedergeben = true;
     }
 }
+
+//Hier wird der Playbackmode falls der Button Checked ist auf Random gesetzt andernfalls auf Loop
 
 void Player::zufallslied()
 {
@@ -439,10 +467,14 @@ void Player::zufallslied()
 
 }
 
+//Diese Funktion macht die Suchzeile sichtbar
+
 void Player::suche()
 {
     ui->widget->setVisible(true);
 }
+
+//Beim Aufruf dieser Funktion wird die Suchzeile geschlossen und die eingegebenen Werte aus den Feldern gelöscht
 
 void Player::suche_beenden()
 {
@@ -572,6 +604,8 @@ void Player::lied_ausgewahlt(int zeile, int spalte)
     playlist->setCurrentIndex(zeile);
 }
 
+//Hier werden die Daten in der json Datei gespeichert
+
 QJsonObject Player::json_erstellen()
 {
     QJsonArray json_dateien;
@@ -590,17 +624,12 @@ QJsonObject Player::json_erstellen()
     return json;
 }
 
+//In dieser Funktion wird die json Datei erstellt
+
 void Player::daten_speichern()
 {
     QString dateiname = "Dateien.json";
     QFile song_datei(dateiname);
-
-    if (!song_datei.open(QIODevice::WriteOnly))
-    {
-        QMessageBox fehlermeldung;
-        fehlermeldung.critical(0, "Fehler", "Ein Fehler beim Öffnen der Datei ist aufgetreten.");
-        return;
-    }
 
     QJsonObject json = json_erstellen();
 

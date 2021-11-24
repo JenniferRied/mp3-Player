@@ -55,6 +55,7 @@ private:
     QIcon* pause;
     QIcon* wiedergabe_Icon;
     int pos;
+    int lautstaerke;
 
     void lied_hinzufuegen(QUrl);
     void liste_tempplayer_leeren();
