@@ -106,7 +106,7 @@ Player::Player(QWidget *parent)
     connect(player,&QMediaPlayer::positionChanged, this, &Player::geaenderte_zeit);
     connect(player, &QMediaPlayer::durationChanged, this, &Player::neues_lied);
     connect(ui->aktuelle_wiedergabe_slider, &QSlider::sliderMoved,this, &Player::geaenderte_position);
-    connect(ui->lautstaerke_slider, &QSlider::valueChanged, this, &Player::lautstaerke_slider);
+    connect(ui->lautstaerke_slider, &QSlider::sliderMoved, this, &Player::lautstaerke_slider);
     connect(quieter, SIGNAL(activated()), this, SLOT(leiser()));
     connect(louder, SIGNAL(activated()), this, SLOT(lauter()));
     connect(ui->stumm_button, SIGNAL(clicked()), this, SLOT(stummschalten()));
@@ -135,7 +135,9 @@ Player::Player(QWidget *parent)
 void Player::leiser()
 {
     int position = ui->lautstaerke_slider->value();
+    ui->lautstaerke_slider->setSliderDown(true);
     ui->lautstaerke_slider->setSliderPosition(position-1);
+    ui->lautstaerke_slider->setSliderDown(false);
 }
 
 //Hier wird nach Betätigung der Taste Pfeil hoch der Wert des Lautstärke-Sliders um 1 erhöht
@@ -143,7 +145,9 @@ void Player::leiser()
 void Player::lauter()
 {
     int position = ui->lautstaerke_slider->value();
+    ui->lautstaerke_slider->setSliderDown(true);
     ui->lautstaerke_slider->setSliderPosition(position+1);
+    ui->lautstaerke_slider->setSliderDown(false);
 }
 
 //Hier werden falls vohanden Lieder, die in der json Datei gespeichert wurden, in die Playliste hinzugefügt
