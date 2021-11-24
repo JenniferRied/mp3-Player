@@ -45,6 +45,8 @@ public slots:
     void shortcut_zufallslied();
     void shortcut_stummschalten();
     void daten_laden();
+    void leiser();
+    void lauter();
 
 private:
     Ui::Player *ui;

@@ -77,6 +77,9 @@ Player::Player(QWidget *parent)
     QShortcut *stop = new QShortcut(QKeySequence("Ctrl+X"), this);
     QShortcut *mute = new QShortcut(QKeySequence("Ctrl+M"), this);
     QShortcut *random = new QShortcut(QKeySequence("Ctrl+R"), this);
+    QShortcut *quieter = new QShortcut(QKeySequence("Down"),this);
+    QShortcut *louder = new QShortcut(QKeySequence("Up"),this);
+
 
     //ToolTips
     ui->wiedergabe_pause_button->setToolTip("Wiedergabe/Pause");
@@ -103,7 +106,9 @@ Player::Player(QWidget *parent)
     connect(player,&QMediaPlayer::positionChanged, this, &Player::geaenderte_zeit);
     connect(player, &QMediaPlayer::durationChanged, this, &Player::neues_lied);
     connect(ui->aktuelle_wiedergabe_slider, &QSlider::sliderMoved,this, &Player::geaenderte_position);
-    connect(ui->lautstaerke_slider, &QSlider::sliderMoved, this, &Player::lautstaerke_slider);
+    connect(ui->lautstaerke_slider, &QSlider::valueChanged, this, &Player::lautstaerke_slider);
+    connect(quieter, SIGNAL(activated()), this, SLOT(leiser()));
+    connect(louder, SIGNAL(activated()), this, SLOT(lauter()));
     connect(ui->stumm_button, SIGNAL(clicked()), this, SLOT(stummschalten()));
     connect(mute, SIGNAL(activated()), this, SLOT(shortcut_stummschalten()));
     connect(ui->weiter_button, SIGNAL(clicked()), this, SLOT(naechstes_lied()));
@@ -122,6 +127,18 @@ Player::Player(QWidget *parent)
     ui->widget->setVisible(false);
     daten_laden();
     tabellenansicht();
+}
+
+void Player::leiser()
+{
+    int position = ui->lautstaerke_slider->value();
+    ui->lautstaerke_slider->setSliderPosition(position-1);
+}
+
+void Player::lauter()
+{
+    int position = ui->lautstaerke_slider->value();
+    ui->lautstaerke_slider->setSliderPosition(position+1);
 }
 
 //Hier werden falls vohanden Lieder, die in der json Datei gespeichert wurden, in die Playliste hinzugefügt
