@@ -717,6 +717,8 @@ void Player::zurueckspulen()
     player->setPosition(position - 5000);
 }
 
+//die Playlist wird wiedergegeben egal in welchen Modus sie ist
+
 void Player::nur_wiedergabe()
 {
     ui->wiedergabe_pause_button->setIcon(*pause);
