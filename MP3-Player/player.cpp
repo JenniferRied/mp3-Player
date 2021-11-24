@@ -669,6 +669,9 @@ void Player::lied_ausgewahlt(int zeile, int spalte)
 {
     Q_UNUSED(spalte);
     playlist->setCurrentIndex(zeile);
+    ui->wiedergabe_pause_button->setIcon(*pause);
+    player->play();
+    wird_wiedergeben = true;
 }
 
 //Hier werden die Daten in der json Datei gespeichert
