@@ -129,11 +129,15 @@ Player::Player(QWidget *parent)
     tabellenansicht();
 }
 
+//Hier wird nach Betätigung der Taste Pfeil runter der Wert des Lautstärke-Sliders um 1 verringert
+
 void Player::leiser()
 {
     int position = ui->lautstaerke_slider->value();
     ui->lautstaerke_slider->setSliderPosition(position-1);
 }
+
+//Hier wird nach Betätigung der Taste Pfeil hoch der Wert des Lautstärke-Sliders um 1 erhöht
 
 void Player::lauter()
 {
