@@ -67,6 +67,7 @@ private:
     Datei_info* lied_erstellen(QString url);
     QJsonObject json_erstellen ();
     void daten_speichern();
+    void nur_wiedergabe();
 
     QList<QMediaPlayer*> liste_tempplayer;
     QMap<QString,Datei_info*> Liedersammlung;
