@@ -300,7 +300,7 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
         }
     }
     playlist->setPlaybackMode(QMediaPlaylist::Loop);
-    wiedergabe();
+    nur_wiedergabe();
 }
 
 //hier wird ein tempurärer Player für die url erstellt, um dessen Daten zu erhalten
@@ -392,9 +392,7 @@ void Player::wiedergabe()
 {
     if(!wird_wiedergeben)
     {
-        ui->wiedergabe_pause_button->setIcon(*pause);
-        player->play();
-        wird_wiedergeben = true;
+        nur_wiedergabe();
     }else{
         ui->wiedergabe_pause_button->setIcon(*wiedergabe_Icon);
         player->pause();
@@ -478,9 +476,7 @@ void Player::vorheriges_lied()
     playlist->previous();
     if(!wird_wiedergeben)
     {
-        ui->wiedergabe_pause_button->setIcon(*pause);
-        player->play();
-        wird_wiedergeben = true;
+        nur_wiedergabe();
     }
 }
 
@@ -491,9 +487,7 @@ void Player::naechstes_lied()
     playlist->next();
     if(!wird_wiedergeben)
     {
-        ui->wiedergabe_pause_button->setIcon(*pause);
-        player->play();
-        wird_wiedergeben = true;
+        nur_wiedergabe();
     }
 }
 
@@ -630,10 +624,6 @@ void Player::sortieren(int i)
             playlist->addMedia(url);
         }
     }
-
-    ui->wiedergabe_pause_button->setIcon(*pause);
-    player->play();
-    wird_wiedergeben = true;
 }
 
 //wird ein Element der Tabelle über Drag and Drop verschoben wird diese auch in der Playlist verschoben
@@ -669,9 +659,7 @@ void Player::lied_ausgewahlt(int zeile, int spalte)
 {
     Q_UNUSED(spalte);
     playlist->setCurrentIndex(zeile);
-    ui->wiedergabe_pause_button->setIcon(*pause);
-    player->play();
-    wird_wiedergeben = true;
+    nur_wiedergabe();
 }
 
 //Hier werden die Daten in der json Datei gespeichert
@@ -727,6 +715,13 @@ void Player::zurueckspulen()
 {
     int position = player->position();
     player->setPosition(position - 5000);
+}
+
+void Player::nur_wiedergabe()
+{
+    ui->wiedergabe_pause_button->setIcon(*pause);
+    player->play();
+    wird_wiedergeben = true;
 }
 
 //Der Destruktur der Klasse
