@@ -631,6 +631,13 @@ void Player::daten_speichern()
     QString dateiname = "Dateien.json";
     QFile song_datei(dateiname);
 
+    if (!song_datei.open(QIODevice::ReadOnly))
+    {
+        QMessageBox fehlermeldung;
+        fehlermeldung.critical(0, "Fehler", "Ein Fehler beim Öffnen der Datei ist aufgetreten.");
+        return;
+    }
+
     QJsonObject json = json_erstellen();
 
     song_datei.write(QJsonDocument(json).toJson(QJsonDocument::Indented));
