@@ -20,33 +20,32 @@ public:
     Player(QWidget *parent = nullptr);
     ~Player();
 
-    void hinzufugen_zur_playlist(const QList<QUrl> &urls);
-
 public slots:
-    void wiedergabe();
-    void stopp();
-    void suche();
-    void suche_starten();
-    void suche_beenden();
+    void leiser();
+    void lauter();
+    void shortcut_zufallslied();
+    void shortcut_stummschalten();
+    void customcontextmenu(const QPoint& pos);
+    void loeschen(int);
     void oeffnen();
+    void stopp();
+    void wiedergabe();
     void geaenderte_position(int sekunden);
     void neues_lied(qint64 millisekunden);
     void geaenderte_zeit(qint64 progress);
     void lautstaerke_slider(int);
     void stummschalten();
-    void naechstes_lied();
     void vorheriges_lied();
+    void naechstes_lied();
     void zufallslied();
-    void lied_ausgewahlt(int zeile, int spalte);
-    void loeschen(int);
-    void customcontextmenu(const QPoint& pos);
-    void bewegt(int logic, int alt, int neu);
+    void suche();
+    void suche_beenden();
+    void suche_starten();
     void sortieren(int);
-    void shortcut_zufallslied();
-    void shortcut_stummschalten();
-    void daten_laden();
-    void leiser();
-    void lauter();
+    void tabelle_dnd(int logic, int alt, int neu);
+    void lied_ausgewahlt(int zeile, int spalte);
+    void vorspulen();
+    void zurueckspulen();
 
 private:
     Ui::Player *ui;
@@ -59,13 +58,15 @@ private:
     int pos;
     int lautstaerke;
 
+    void daten_laden();
+    void hinzufugen_zur_playlist(const QList<QUrl> &urls);
     void lied_hinzufuegen(QUrl);
     void liste_tempplayer_leeren();
     bool ist_treffer(const QString& zeilenInhalt, const QString& suchVorgabe);
     void tabellenansicht();
     Datei_info* lied_erstellen(QString url);
-    void daten_speichern();
     QJsonObject json_erstellen ();
+    void daten_speichern();
 
     QList<QMediaPlayer*> liste_tempplayer;
     QMap<QString,Datei_info*> Liedersammlung;

@@ -26,8 +26,8 @@ Player::Player(QWidget *parent)
     //https://www.flaticon.com/de/kostenloses-icon/wiedergabetaste_149668?term=play&page=1&position=2&page=1&position=2&related_id=149668&origin=search
     wiedergabe_Icon = new QIcon(":/Bilder/wiedergabetaste.png");
     //https://www.flaticon.com/premium-icon/backward_2938636?term=backward&page=1&position=40&page=1&position=40&related_id=2938636&origin=search
-    QIcon* zurueckspulen = new QIcon(":/Bilder/backward.png");
-    QIcon* vorspulen = new QIcon(":/Bilder/forward.png");
+    QIcon* zurueckspulen_icon = new QIcon(":/Bilder/backward.png");
+    QIcon* vorspulen_icon = new QIcon(":/Bilder/forward.png");
     //https://www.flaticon.com/search?word=random&order_by=4&type=icon
     QIcon* zufall = new QIcon(":/Bilder/shuffle-arrows.png");
     //https://www.flaticon.com/search/2?word=next&order_by=4&type=icon
@@ -54,9 +54,9 @@ Player::Player(QWidget *parent)
 
     ui->wiedergabe_pause_button->setIcon(*wiedergabe_Icon);
     ui->wiedergabe_pause_button->setIconSize(iconSize);
-    ui->zurueckspulen_button->setIcon(*zurueckspulen);
+    ui->zurueckspulen_button->setIcon(*zurueckspulen_icon);
     ui->zurueckspulen_button->setIconSize(iconSize_zurueckspulen_vorspulen);
-    ui->vorspulen_button->setIcon(*vorspulen);
+    ui->vorspulen_button->setIcon(*vorspulen_icon);
     ui->vorspulen_button->setIconSize(iconSize_zurueckspulen_vorspulen);
     ui->zufall_button->setIcon(*zufall);
     ui->zufall_button->setIconSize(iconSize);
@@ -119,9 +119,10 @@ Player::Player(QWidget *parent)
     connect(random, SIGNAL(activated()), this, SLOT(shortcut_zufallslied()));
     connect(ui->tableWidget,&QTableWidget::cellDoubleClicked,this, &Player::lied_ausgewahlt);
     connect(ui->tableWidget,SIGNAL(customContextMenuRequested(QPoint)),this, SLOT(customcontextmenu(QPoint)));
-    connect(ui->tableWidget->verticalHeader(), &QHeaderView::sectionMoved, this, &Player::bewegt);
+    connect(ui->tableWidget->verticalHeader(), &QHeaderView::sectionMoved, this, &Player::tabelle_dnd);
     connect(ui->tableWidget->horizontalHeader(), &QHeaderView::sectionClicked, this, &Player::sortieren);
-
+    connect(ui->vorspulen_button, SIGNAL(clicked()),this, SLOT(vorspulen()));
+    connect(ui->zurueckspulen_button, SIGNAL(clicked()),this, SLOT(zurueckspulen()));
 
     ui->tableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget->setVisible(false);
@@ -238,6 +239,8 @@ void Player::loeschen(int pos)
     tabellenansicht();
 }
 
+//das hier ist der öffnen-Dialog und übergibt die Liste der urls an hinzufugen_zur_playlist
+
 void Player::oeffnen()
 {
     QFileDialog hinzufuegen(this);
@@ -251,6 +254,8 @@ void Player::oeffnen()
     }
 }
 
+//hier wird überprüft, ob die Datei existiert und eine mp3-Datei ist
+
 static bool ist_playlist(const QUrl &url)
 {
     if (!url.isLocalFile())
@@ -259,6 +264,8 @@ static bool ist_playlist(const QUrl &url)
 
     return fileInfo.exists() && !fileInfo.suffix().compare(QLatin1String("m3u"), Qt::CaseInsensitive);
 }
+
+//hier wird überprüft, ob es sich um eine mp3-Datei handelt und einzelt der Playlist hinzugefügt
 
 void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
 {
@@ -291,6 +298,8 @@ void Player::hinzufugen_zur_playlist(const QList<QUrl> &urls)
     playlist->setPlaybackMode(QMediaPlaylist::Loop);
     wiedergabe();
 }
+
+//hier wird ein tempurärer Player für die url erstellt, um dessen Daten zu erhalten
 
 void Player::lied_hinzufuegen(QUrl url)
 {
@@ -349,6 +358,8 @@ void Player::lied_hinzufuegen(QUrl url)
     });
 }
 
+//die tempurären Player werden gelöscht und dessen liste geleert
+
 void Player::liste_tempplayer_leeren()
 {
     for(QMediaPlayer *tempplayer: liste_tempplayer)
@@ -357,6 +368,8 @@ void Player::liste_tempplayer_leeren()
     }
     liste_tempplayer.clear();
 }
+
+//das aktuelle Lied wird gestoppt und das Button Icon angepasst
 
 void Player::stopp()
 {
@@ -367,6 +380,9 @@ void Player::stopp()
         wird_wiedergeben = false;
     }
 }
+
+/*das Lied wird wiedergegeben wenn es pausiert ist und anders herum, ausschlaggebend ist der
+  boolien wird_wiedergegeben */
 
 void Player::wiedergabe()
 {
@@ -382,11 +398,14 @@ void Player::wiedergabe()
     }
 }
 
+//Der Slider der Wiedergabe wurde bewegt, deswegen muss die Position des Players geändert werden
+
 void Player::geaenderte_position(int sekunden)
 {
     player->setPosition(sekunden * 1000);
 }
 
+//Der Slider wird auf das neue Maximum des neuen Liedes gesetzt, sowie das Label auf den Titel mit Künstler
 
 void Player::neues_lied(qint64 millisekunden)
 {
@@ -396,6 +415,8 @@ void Player::neues_lied(qint64 millisekunden)
     QString kuenstler = Liedersammlung[url]->getArtist();
     ui->aktuelles_lied->setText(titel + " - " + kuenstler);
 }
+
+//Hier werden die Labels mit der gespielten und gesamt Zeit gesetzt
 
 void Player::geaenderte_zeit(qint64 progress)
 {
@@ -421,6 +442,7 @@ void Player::lautstaerke_slider(int position)
 
 /*Hier wird die Lautstärker auf 0 gesetzt, sofern sie vorher größer als 0 war. Ist die Lauststärke bereits
 0, so wird die Lautstärke auf die vorherige Lautstärke gesetzt*/
+
 void Player::stummschalten()
 {
 
@@ -445,7 +467,7 @@ void Player::stummschalten()
     }
 }
 
-//Hier wird das vorherige Lied abgespielt
+//Hier wird das vorherige Lied abgespielt und wiedergegeben
 
 void Player::vorheriges_lied()
 {
@@ -458,7 +480,7 @@ void Player::vorheriges_lied()
     }
 }
 
-//Hier wird das nächste Lied abgespielt
+//Hier wird das nächste Lied abgespielt und wiedergegeben
 
 void Player::naechstes_lied()
 {
@@ -505,6 +527,8 @@ void Player::suche_beenden()
     ui->widget->setVisible(false);
 }
 
+//gibt es eine Änderung in der Sucheingabe, wird diese Funktion aufrufen, die den Text herausholt und mit den Tabelleneinträgen vergleicht
+
 void Player::suche_starten()
 {
     QString titel = ui->titel_lineEdit->text();
@@ -521,10 +545,15 @@ void Player::suche_starten()
      }
 }
 
+//Überprüfung ob es einen Sucheintag gibt oder ob der zeileninhalt mit der Sucheingabe übereinstimmt
+
 bool Player::ist_treffer(const QString &zeilenInhalt, const QString &suchVorgabe)
 {
     return suchVorgabe.isEmpty() || zeilenInhalt.contains(suchVorgabe);
 }
+
+/*hier wird die Tabelle erstellt, dabei gibt es eine unsichtbare Spalte mit den Urls
+  existiert in der Map kein Eintrag mit der url so wird ein leeres DAtei_info-Objekt genutzt*/
 
 void Player::tabellenansicht()
 {
@@ -565,13 +594,18 @@ void Player::tabellenansicht()
         ui->tableWidget->setItem(lieder_nr,4,url);
     }
 
+    //Zeile der Länge kleiner als der Rest
     ui->tableWidget->horizontalHeader()->setMinimumSectionSize(1);
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Fixed);
     ui->tableWidget->setColumnWidth(3,90);
+    //Drag and Drop ermöglichen
     ui->tableWidget->verticalHeader()->setSectionsMovable(true);
     ui->tableWidget->verticalHeader()->setDragEnabled(true);
     ui->tableWidget->verticalHeader()->setDragDropMode(QAbstractItemView::InternalMove);
 }
+
+/*wird nach einer tabellen Spalte sortiert, wird die Playlist einmal geleert und
+mit den Urls aus der Tabelle in der richtigen Reihenfolge wieder gefüllt*/
 
 void Player::sortieren(int i)
 {
@@ -598,11 +632,16 @@ void Player::sortieren(int i)
     wird_wiedergeben = true;
 }
 
-void Player::bewegt(int logischer_index, int alter_index, int neuer_index)
+//wird ein Element der Tabelle über Drag and Drop verschoben wird diese auch in der Playlist verschoben
+
+void Player::tabelle_dnd(int logischer_index, int alter_index, int neuer_index)
 {
     Q_UNUSED(logischer_index);
     playlist->moveMedia(alter_index, neuer_index);
 }
+
+/*hier wird geschaut, ob zu der url schon ein Eintag in der Map existiert und wenn nicht wird ein
+  eintrag mit "-" für alle Attribute erstellt */
 
 Datei_info *Player::lied_erstellen(QString url)
 {
@@ -613,11 +652,14 @@ Datei_info *Player::lied_erstellen(QString url)
         info->setTitle("-");
         info->setArtist("-");
         info->setAlbum("-");
+        info->setLength("-");
         Liedersammlung[url] = info;
     }
 
     return info;
 }
+
+//bei doppelklick auf eine Zeile wird diese Zeile als aktuell wiederzugebenes Lied gesetzt
 
 void Player::lied_ausgewahlt(int zeile, int spalte)
 {
@@ -663,6 +705,24 @@ void Player::daten_speichern()
 
     song_datei.write(QJsonDocument(json).toJson(QJsonDocument::Indented));
 }
+
+//das aktuell wiedergegebene Lied wird um 5sek nach vorne gespult
+
+void Player::vorspulen()
+{
+    int position = player->position();
+    player->setPosition(position + 5000);
+}
+
+//das aktuell wiedergegebene Lied wird um 5sek zurück gespult
+
+void Player::zurueckspulen()
+{
+    int position = player->position();
+    player->setPosition(position - 5000);
+}
+
+//Der Destruktur der Klasse
 
 Player::~Player()
 {
